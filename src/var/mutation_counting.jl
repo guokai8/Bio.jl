@@ -47,6 +47,26 @@ T <-> G
 """
 immutable TransversionMutation <: MutationType end
 
+
+@inline function bitpar_count2(::Type{AnyMutation}, x::UInt64, y::UInt64)
+    return bitpar_mismatches2(x, y)
+end
+
+@inline function bitpar_count4(::Type{AnyMutation}, x::UInt64, y::UInt64)
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
 """
     is_ambiguous_strict{T<:Nucleotide}(a::T, b::T)
 
