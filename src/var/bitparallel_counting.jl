@@ -107,11 +107,12 @@ mismatches between two chunks of BioSequence{(DNA|RNA)Nucleotide{4}} data.
 **Note:** Ambiguous cases or cases with gaps are ignored and not counted as
 mismatches. For example, 'A' and 'R', or 'A' and '-' will not be counted.
 """
-function bitpar_count4(::Type{Mismatch}, a::UInt64, b::UInt64)
+@inline function bitpar_count4(::Type{Mismatch}, a::UInt64, b::UInt64)
     cases = a $ b
     # cases is the result of xoring a and b.
-    # if two nucleotides are different, they will contain 1's.
-    # if two nucleotides are matches or 2 gaps, they will only have 0's.
+    # If two nucleotides are different, they will contain 1's.
+    # If two nucleotides are matches or 2 gaps, they will only have 0's.
+    # Unambiguous mismatches always have 2 set bits, and we can explot this.
     enumeratedCases = bitpar_count4(cases)
     # enumeratedCases contains the number of set bits, for each position.
     # When a position is 0000, it either represents a match or a gap.
@@ -127,9 +128,26 @@ function bitpar_count4(::Type{Mismatch}, a::UInt64, b::UInt64)
     return matchMismatchGapCount - matchGapCount
 end
 
-
-
-
+@inline function bitpar_count4(::Type{Ambiguous}, a::UInt64, b::UInt64)
+    cases = a $ b
+    # cases is the result of xoring a and b.
+    # If two nucleotides are different, they will contain 1's.
+    # If two nucleotides are matches or 2 gaps, they will only have 0's.
+    # Unambiguous mismatches always have 2 set bits, and we can explot this.
+    enumeratedCases = bitpar_count4(cases)
+    # enumeratedCases contains the number of set bits, for each position.
+    # When a position is 0000, it either represents a match or a gap.
+    # A normal mismatch is 0010, anything ambiguous will not be 0010.
+    matchAmbiguousGapCount = bitpar_zeros4(enumeratedCases & 0x2222222222222222)
+    # The enumeratedCases are filtered by masking with 0x2222222...
+    # this results in ambiguous cases i.e. not 0010, being masked to 0000.
+    # These 0000 cases are then counted by bitpar_zeros4 to get the number of
+    # cases that are clear matches, ambiguous cases, and those that are gaps.
+    # To get the number of ambiguous cases, we now have to enumerate the number
+    # of matches or gaps, and subtract that from matchAmbiguousGapCount.
+    matchGapCount = bitpar_zeros4(cases)
+    return matchAmbiguousGapCount - matchGapCount
+end
 
 
 
