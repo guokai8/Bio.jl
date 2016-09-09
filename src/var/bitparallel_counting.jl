@@ -37,8 +37,8 @@ Counts the cases of interest.
 
 A case of interest is anything where all four bits of a nucleotide are not set.
 
-This can be interpreted as all cases with gaps or any filterd cases and cases
-with gaps.
+What a case of interest actually means depends on the operations and masks
+performed on `x` before this method is called on `x`.
 
 **This is an internal method and should not be exported.**
 
@@ -58,10 +58,6 @@ Would result in:
     (x & 0x8888888888888888) >> 3)
 end
 
-gapcount(x::UInt64) = bitpar_zeros4(x)
-gapcount(a::UInt64, b::UInt64) = gapcount(a | b)
-
-
 """
     bitpar_count4(::Type{Gap}, x::UInt64)
 
@@ -80,9 +76,27 @@ An _internal_ function _not for export_, which will count the number of
 contain gap characters.
 """
 @inline function bitpar_count4(::Type{Gap}, a::UInt64, b::UInt64)
-    return bitpar_count4(a | b)
+    return bitpar_count4(Gap, a | b)
 end
 
+"""
+    bitpar_count4(::Type{Match}, a::UInt64, b::UInt64)
+
+An _internal_ function, _not for export_, which will count the number of
+mismatches between two chunks of BioSequence{(DNA|RNA)Nucleotide{4}} data.
+
+**Note:** Ambiguous cases or cases with gaps are ignored and not counted as
+matches. For example, 'A' and 'R', or 'A' and '-' will not be counted.
+"""
+@inline function bitpar_count4(::Type{Match}, a::UInt64, b::UInt64)
+    cases = a $ b
+    # cases is the result of xoring a and b.
+    # if two nucleotides are different, they will contain 1's.
+    # if two nucleotides are matches or 2 gaps, they will only have 0's.
+    matchGapCount = bitpar_zeros4(cases)
+    gapCount = bitpar_count4(Gap, a, b)
+    return matchGapCount - gapCount
+end
 
 """
     bitpar_count4(::Type{Mismatch}, a::UInt64, b::UInt64)
@@ -112,6 +126,7 @@ function bitpar_count4(::Type{Mismatch}, a::UInt64, b::UInt64)
     matchGapCount = bitpar_zeros4(cases)
     return matchMismatchGapCount - matchGapCount
 end
+
 
 
 
