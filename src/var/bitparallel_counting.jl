@@ -5,31 +5,14 @@ immutable Transition <: SiteCase end
 immutable Transversion <: SiteCase end
 immutable Gap <: SiteCase end
 immutable Ambiguous <: SiteCase end
+immutable Pairdel <: SiteCase end
+
+
+
+# Internal low-level functions
 
 """
-    bitpar_count4(abxor::UInt64)
-
-Count the number of set bits, in groups of four bits (which represent each abstract Nucleotide).
-
-**This is an internal method and should not be exported.**
-
-E.g. An input of:
-
-0100 0010 0001 0110 1100 1110 1101 1111
-
-Would result in:
-
-0001 0001 0001 0010 0010 0011 0011 0100
-
-This is used to identify different occurances of bit patterns.
-"""
-@inline function bitpar_count4(x::UInt64)
-    x = x - ((x >> 1) & 0x5555555555555555)
-    return (x & 0x3333333333333333) + ((x >> 2) & 0x3333333333333333)
-end
-
-"""
-    bitpar_zeros4()
+    bp_count_allzero4()
 
 Recieves a filtered Nucleotide map.
 
@@ -51,7 +34,7 @@ Would result in:
 0001 0000 0001 0001 0001 0001 0001 0001
      ^^^^
 """
-@inline function bitpar_zeros4(x::UInt64)
+@inline function bp_count_allzero4(x::UInt64)
     return 16 - count_ones((x & 0x1111111111111111) |
     (x & 0x2222222222222222) >> 1 |
     (x & 0x4444444444444444) >> 2 |
@@ -59,14 +42,109 @@ Would result in:
 end
 
 """
+    bp_enumerate4(abxor::UInt64)
+
+Count the number of set bits, in groups of four bits (which represent each abstract Nucleotide).
+
+**This is an internal method and should not be exported.**
+
+E.g. An input of:
+
+0100 0010 0001 0110 1100 1110 1101 1111
+
+Would result in:
+
+0001 0001 0001 0010 0010 0011 0011 0100
+
+This is used to identify different occurances of bit patterns.
+"""
+@inline function enumerate4(x::UInt64)
+    x = x - ((x >> 1) & 0x5555555555555555)
+    return (x & 0x3333333333333333) + ((x >> 2) & 0x3333333333333333)
+end
+
+## Base position masking functions.
+
+"""
+    mask_nibbles(x::UInt64, value::UInt64)
+
+An internal method, **not for export**, which creates bitmasks for nibbles
+(groups of four bits) matching certain values.
+"""
+@inline function mask_nibbles(x::UInt64, value::UInt64)
+    x = ~(x $ value)
+    x = (x & 0x1111111111111111) &
+    ((x >> 1) & 0x1111111111111111) &
+    ((x >> 2) & 0x1111111111111111) &
+    ((x >> 3) & 0x1111111111111111)
+    return x | (x << 1) | (x << 2) | (x << 3)
+end
+
+@inline function create_mask(::Type{Gap}, x::UInt64)
+    return mask_nibbles(x, 0x0000000000000000)
+end
+
+@inline function create_mask(::Type{Ambiguous}, x::UInt64)
+    c = enumerate4(x)
+    return mask_nibbles(c, 0x2222222222222222) |
+    mask_nibbles(c, 0x3333333333333333) |
+    mask_nibbles(c, 0x4444444444444444)
+end
+
+@inline function create_mask(::Type{Pairdel}, x::UInt64)
+    return create_mask(Gap, x) | create_mask(Ambiguous, x)
+end
+
+@inline function create_mask(::Type{Gap}, a::UInt64, b::UInt64)
+    return create_mask(Gap, a) | create_mask(Gap, b)
+end
+
+@inline function create_mask(::Type{Ambiguous}, a::UInt64, b::UInt64)
+    return create_mask(Ambiguous, a) | create_mask(Ambiguous, b)
+end
+
+@inline function create_mask(::Type{Pairdel}, a::UInt64, b::UInt64)
+    return create_mask(Pairdel, a) | create_mask(Pairdel, b)
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
     bitpar_count4(::Type{Gap}, x::UInt64)
 
 An _internal_ function _not for export_, which will count the number of
-gap characters in a chunk of BioSequence{(DNA|RNA)Nucleotide{4}} data.
+gap sites in a chunk of BioSequence{(DNA|RNA)Nucleotide{4}} data.
+Note that gap sites and empty unused segments of a UInt64 are both 0000,
+and so furthur checking of this result would be required in higher level calling
+functions.
 """
 @inline function bitpar_count4(::Type{Gap}, x::UInt64)
-    return bitpar_zeros4(x)
+    return bp_count_allzero4(x)
 end
+
+@inline function _mask(::Type{Gap}, x::UInt64)
+    return bp_enumerate4(~x)
+end
+
+@inline function _mask(::Type{Gap}, a::UInt64, b::UInt64)
+    return _mask(Gap, a) | _mask(Gap, b)
+end
+
+
+
+
 
 """
     bitpar_count4(::Type{Gap}, a::UInt64, b::UInt64)
@@ -76,8 +154,43 @@ An _internal_ function _not for export_, which will count the number of
 contain gap characters.
 """
 @inline function bitpar_count4(::Type{Gap}, a::UInt64, b::UInt64)
-    return bitpar_count4(Gap, a | b)
+    # Count the gaps in a, count the gaps in b, subtract the number of shared gaps.
+    return bitpar_count4(Gap, a) + bitpar_count4(Gap, b) - bitpar_count4(Gap, a | b)
 end
+
+"""
+    bitpar_count4(::Type{Ambiguous}, x::UInt64)
+
+An _internal_ function _not for export_, which will count the number of
+ambiguous sites in a chunk of BioSequence{(DNA|RNA)Nucleotide{4}} data.
+Ambiuous sites are defined as those with more than one bit set.
+Note here gap - 0000 - then is not ambiguous, even though it is a candidate for
+pairwise deletion.
+"""
+@inline function bitpar_count4(::Type{Ambiguous}, x::UInt64)
+    return 16 - bp_count_allzero4(bp_enumerate4(x) & 0xEEEEEEEEEEEEEEEE)
+end
+
+@inline function bitpar_count4(::Type{Ambiguous}, a::UInt64, b::UInt64)
+
+end
+
+"""
+    bitpar_count4(::Type{Pairdel}, x::UInt64)
+
+An _internal_ function _not for export_, which will count the number of sites in
+a chunk of BioSequence{(DNA|RNA)Nucleotide{4}} data that would be ignored in
+counts of mutations.
+Such sites are defined as those with gaps or ambiguous characters in them.
+"""
+@inline function bitpar_count4(::Type{Pairdel}, x::UInt64)
+    return bitpar_count4(Ambiguous, x) + bitpar_count4(Gap, x)
+end
+
+@inline function bitpar_count4(::Type{Pairdel}, x::UInt64)
+    + bitpar_count4(Gap, a, b)
+end
+
 
 """
     bitpar_count4(::Type{Match}, a::UInt64, b::UInt64)
@@ -89,13 +202,13 @@ mismatches between two chunks of BioSequence{(DNA|RNA)Nucleotide{4}} data.
 matches. For example, 'A' and 'R', or 'A' and '-' will not be counted.
 """
 @inline function bitpar_count4(::Type{Match}, a::UInt64, b::UInt64)
+    sharedGaps = bitpar_count4(Gap, a | b)
     cases = a $ b
     # cases is the result of xoring a and b.
     # if two nucleotides are different, they will contain 1's.
     # if two nucleotides are matches or 2 gaps, they will only have 0's.
     matchGapCount = bitpar_zeros4(cases)
-    gapCount = bitpar_count4(Gap, a, b)
-    return matchGapCount - gapCount
+    return matchGapCount - sharedGaps
 end
 
 """
@@ -113,7 +226,7 @@ mismatches. For example, 'A' and 'R', or 'A' and '-' will not be counted.
     # If two nucleotides are different, they will contain 1's.
     # If two nucleotides are matches or 2 gaps, they will only have 0's.
     # Unambiguous mismatches always have 2 set bits, and we can explot this.
-    enumeratedCases = bitpar_count4(cases)
+    enumeratedCases = bitpar_enumerate4(cases)
     # enumeratedCases contains the number of set bits, for each position.
     # When a position is 0000, it either represents a match or a gap.
     # A normal mismatch is 0010, anything ambiguous will not be 0010.
@@ -134,7 +247,7 @@ end
     # If two nucleotides are different, they will contain 1's.
     # If two nucleotides are matches or 2 gaps, they will only have 0's.
     # Unambiguous mismatches always have 2 set bits, and we can explot this.
-    enumeratedCases = bitpar_count4(cases)
+    enumeratedCases = bitpar_enumerate4(cases)
     # enumeratedCases contains the number of set bits, for each position.
     # When a position is 0000, it either represents a match or a gap.
     # A normal mismatch is 0010, anything ambiguous will not be 0010.

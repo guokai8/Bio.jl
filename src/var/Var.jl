@@ -12,6 +12,15 @@ using Bio.Seq
 
 export
 
+    # Site Counting
+    SiteCase
+    Match,
+    Mismatch,
+    Transition,
+    Transversion,
+    Gap,
+    Ambiguous,
+
     # Mutation types
     MutationType,
     AnyMutation,
@@ -34,7 +43,7 @@ export
 
 
 
-
+include("bitparallel_counting.jl")
 include("mutation_counting.jl")
 include("distances.jl")
 

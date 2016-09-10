@@ -5,6 +5,70 @@ using Base.Test
 using Bio.Seq
 using Bio.Var
 
+@testset "Bit parallel counting" begin
+    # 4 consecutive matches, 4 consecutive mismatches, 4 consecutive ambigs,
+    # 4 consecutive gaps.
+    aseq = dna"ATCGATCGARMGA-M-"
+    bseq = dna"ATCGTCGARMWY-T--"
+    cseq = dna"ATCGMRWSYKVHDBN-"
+    a = aseq.data[1]
+    b = bseq.data[1]
+    c = cseq.data[1]
+
+    @testset "Internal" begin
+        @testset "Counting zeros" begin
+            @test bp_count_allzero4(0x0000000000000000) == 16
+            @test bp_count_allzero4(0xF004020000403010) == 10
+        end
+        @testset "Enumerating nibbles" begin
+            @test bp_enumerate4(0x0000000000000000) == 0x0000000000000000
+            @test bp_enumerate4(0xF004020000403010) == 0x4001010000102010
+        end
+        @testset "Masking nibbles" begin
+            @test create_mask(Gap, a) == 0xf0f0000000000000
+            @test create_mask(Gap, b) == 0xff0f000000000000
+            @test create_mask(Gap, a, b) == 0xffff000000000000
+            @test create_mask(Ambiguous, a) == 0x0f000ff000000000
+            @test create_mask(Ambiguous, b) == 0x0000ffff00000000
+            @test create_mask(Ambiguous, a, b) == 0x0f00ffff00000000
+            @test create_mask(Pairdel, a) == 0xfff00ff000000000
+            @test create_mask(Pairdel, b) == 0xff0fffff00000000
+            @test create_mask(Pairdel, a, b) == 0xffffffff00000000
+        end
+    end
+
+
+
+
+    @testset "Gaps" begin
+        @test bitpar_count4(Gap, a) == 2
+        @test bitpar_count4(Gap, b) == 3
+        @test bitpar_count4(Gap, a, b) == bitpar_count4(Gap, b, a) == 4
+        @test bitpar_count4(Gap, a | b) == bitpar_count4(Gap, b | a) == 1
+    end
+
+    @testset "Ambiguities" begin
+        @test bitpar_count4(Ambiguous, c) == 11
+        @test bitpar_count4(Ambiguous, a) == 3
+        @test bitpar_count4(Ambiguous, b) == 4
+    end
+
+    @testset "Pairdel" begin
+        @test bitpar_count4(Pairdel, a) == 5
+        @test bitpar_count4(Pairdel, b) == 7
+        @test bitpar_count4(Pairdel, c) == 12
+    end
+
+
+    @testset "Matches" begin
+        @test bitpar_count4(Match, a, b) == bitpar_count4(Match, b, a) == 4
+        @test  == 4
+    end
+    @testset "Mismatches" begin
+        @test bitpar_count4(Mismatch, a, b) == bitpar_count4(Mismatch, b, a) == 4
+    end
+end
+
 @testset "Counting mutations" begin
 
     # Create a 20bp test DNA sequence pair containing every possible transition (4),
