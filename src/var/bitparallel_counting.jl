@@ -77,13 +77,13 @@ end
 =#
 
 """
-    mask_nibbles(x::UInt64, value::UInt64)
+    create_nibble_mask(x::UInt64, value::UInt64)
 
-An internal method, **not for export**, which creates bitmasks for the nibbles
+An internal method, **not for export**, which creates masks for the nibbles
 (groups of four bits) in a 64 bit integer `x` that match a given value dictated
 by the pattern in `value`.
 """
-@inline function mask_nibbles(x::UInt64, value::UInt64)
+@inline function create_nibble_mask(value::UInt64, x::UInt64)
     x $= value
     x |= (x >> 1)
     x |= (x >> 2)
@@ -94,22 +94,22 @@ end
 
 
 """
-    create_mask(::Type{Gap}, x::UInt64)
+    create_nibble_mask(::Type{Gap}, x::UInt64)
 
-Create a bitmask of the gap sites in a chunk of
-BioSequence{(DNA|RNA)Nucleotide{4}} data.
+Create a mask of the nibbles in a chunk of
+BioSequence{(DNA|RNA)Nucleotide{4}} data that represent gaps.
 """
-@inline function create_mask(::Type{Gap}, x::UInt64)
+@inline function create_nibble_mask(::Type{Gap}, x::UInt64)
     return mask_nibbles(x, 0x0000000000000000)
 end
 
 """
-    create_mask(::Type{Ambiguous}, x::UInt64)
+    create_nibble_mask(::Type{Ambiguous}, x::UInt64)
 
-Create a bitmask of the ambiguous sites in a chunk of
-BioSequence{(DNA|RNA)Nucleotide{4}} data.
+Create a mask of the nibbles in a chunk of
+BioSequence{(DNA|RNA)Nucleotide{4}} data that represent ambiguous sites.
 """
-@inline function create_mask(::Type{Ambiguous}, x::UInt64)
+@inline function create_nibble_mask(::Type{Ambiguous}, x::UInt64)
     c = enumerate4(x)
     return mask_nibbles(c, 0x2222222222222222) |
     mask_nibbles(c, 0x3333333333333333) |
@@ -117,24 +117,25 @@ BioSequence{(DNA|RNA)Nucleotide{4}} data.
 end
 
 """
-    create_mask(::Type{Pairdel}, x::UInt64)
+    create_nibble_mask(::Type{Pairdel}, x::UInt64)
 
-Create a bitmask of the ambiguous sites in a chunk of
-BioSequence{(DNA|RNA)Nucleotide{4}} data.
+Create a mask of the nibbles in a chunk of
+BioSequence{(DNA|RNA)Nucleotide{4}} data that represent sites that should be
+ignored, when counting pairwise mutations between sequences.
 """
-@inline function create_mask(::Type{Pairdel}, x::UInt64)
+@inline function create_nibble_mask(::Type{Pairdel}, x::UInt64)
     return create_mask(Gap, x) | create_mask(Ambiguous, x)
 end
 
-@inline function create_mask(::Type{Gap}, a::UInt64, b::UInt64)
+@inline function create_nibble_mask(::Type{Gap}, a::UInt64, b::UInt64)
     return create_mask(Gap, a) | create_mask(Gap, b)
 end
 
-@inline function create_mask(::Type{Ambiguous}, a::UInt64, b::UInt64)
+@inline function create_nibble_mask(::Type{Ambiguous}, a::UInt64, b::UInt64)
     return create_mask(Ambiguous, a) | create_mask(Ambiguous, b)
 end
 
-@inline function create_mask(::Type{Pairdel}, a::UInt64, b::UInt64)
+@inline function create_nibble_mask(::Type{Pairdel}, a::UInt64, b::UInt64)
     return create_mask(Pairdel, a) | create_mask(Pairdel, b)
 end
 
