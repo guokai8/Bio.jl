@@ -185,10 +185,11 @@ end
 """
     count_sites4(::Type{Gap}, x::UInt64)
 
-An _internal_ function _not for export_, which will count the number of
-gap sites in a chunk of BioSequence{(DNA|RNA)Nucleotide{4}} data.
-Note that gap sites and empty unused segments of a UInt64 are both 0000,
-and so furthur checking of this result would be required in higher level calling
+Count the number of gap sites in a chunk of BioSequence{(DNA|RNA)Nucleotide{4}}
+data.
+
+Note that gap sites and empty unused segments of a UInt64 are both 0000, and so
+furthur checking of this result would be required in higher level calling
 functions.
 """
 @inline function count_sites4(::Type{Gap}, x::UInt64)
@@ -198,9 +199,12 @@ end
 """
     count_sites4(::Type{Gap}, a::UInt64, b::UInt64)
 
-An _internal_ function _not for export_, which will count the number of
-**positions** in two chunks of BioSequence{(DNA|RNA)Nucleotide{4}} data which
-contain gap characters.
+Count the number of sites in two aligned chunks of
+BioSequence{(DNA|RNA)Nucleotide{4}} data which contain gap characters.
+
+Note that gap sites and empty unused segments of a UInt64 are both 0000, and so
+furthur checking of this result would be required in higher level calling
+functions.
 """
 @inline function count_sites4(::Type{Gap}, a::UInt64, b::UInt64)
     # Count the gaps in a, count the gaps in b, subtract the number of shared gaps.
@@ -210,19 +214,33 @@ end
 """
     count_sites4(::Type{Ambiguous}, x::UInt64)
 
-An _internal_ function _not for export_, which will count the number of
+Count the number of
 ambiguous sites in a chunk of BioSequence{(DNA|RNA)Nucleotide{4}} data.
 Ambiuous sites are defined as those with more than one bit set.
 Note here gap - 0000 - then is not ambiguous, even though it is a candidate for
 pairwise deletion.
 """
 @inline function count_sites4(::Type{Ambiguous}, x::UInt64)
-    return 16 - bp_count_allzero4(bp_enumerate4(x) & 0xEEEEEEEEEEEEEEEE)
+    return 16 - count_zero_nibbles(enumerate_nibbles(x) & 0xEEEEEEEEEEEEEEEE)
 end
 
+"""
+    count_sites4(::Type{Gap}, a::UInt64, b::UInt64)
+
+Count the number of sites in two aligned chunks of
+BioSequence{(DNA|RNA)Nucleotide{4}} data which contain ambiguous characters.
+Ambiuous sites are defined as those with more than one bit set.
+Note here gap - 0000 - then is not ambiguous, even though it is a candidate for
+pairwise deletion.
+"""
 @inline function count_sites4(::Type{Ambiguous}, a::UInt64, b::UInt64)
-
+    return 16 - count_zero_nibbles((enumerate_nibbles(a) | enumerate_nibbles(b)) & 0xEEEEEEEEEEEEEEEE)
 end
+
+
+
+
+
 
 """
     count_sites4(::Type{Pairdel}, x::UInt64)
@@ -237,7 +255,7 @@ Such sites are defined as those with gaps or ambiguous characters in them.
 end
 
 @inline function count_sites4(::Type{Pairdel}, x::UInt64)
-    + count_sites4(Gap, a, b)
+    1 + count_sites4(Gap, a, b)
 end
 
 
