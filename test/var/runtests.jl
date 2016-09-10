@@ -120,7 +120,6 @@ using Bio.Var
 
             dnas1 = [dna"ATTG-ACCTGGNTTTCCGAA", dna"A-ACAGAGTATACRGTCGTC"]
             m1 = seqmatrix(dnas1, :seq)
-
             dnas2 = [dna"attgaacctggntttccgaa", dna"atacagagtatacrgtcgtc"]
             m2 = seqmatrix(dnas2, :seq)
 
