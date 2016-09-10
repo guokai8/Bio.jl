@@ -13,7 +13,7 @@ using Bio.Seq
 export
 
     # Site Counting
-    SiteCase
+    SiteCase,
     Match,
     Mismatch,
     Transition,
