@@ -131,14 +131,36 @@ ignored, when counting pairwise mutations between sequences.
     return create_mask(Gap, x) | create_mask(Ambiguous, x)
 end
 
+"""
+    create_nibble_mask(::Type{Gap}, a::UInt64, b::UInt64)
+
+Create a mask of the nibbles in two chunks of
+BioSequence{(DNA|RNA)Nucleotide{4}} data that represent sites where either or
+both of the two chunks have a gap at a given nibble.
+"""
 @inline function create_nibble_mask(::Type{Gap}, a::UInt64, b::UInt64)
     return create_mask(Gap, a) | create_mask(Gap, b)
 end
 
+"""
+    create_nibble_mask(::Type{Ambiguous}, a::UInt64, b::UInt64)
+
+Create a mask of the nibbles in two chunks of
+BioSequence{(DNA|RNA)Nucleotide{4}} data that represent sites where either or
+both of the two chunks have an ambiguous nucleotide at a given nibble.
+"""
 @inline function create_nibble_mask(::Type{Ambiguous}, a::UInt64, b::UInt64)
     return create_mask(Ambiguous, a) | create_mask(Ambiguous, b)
 end
 
+"""
+    create_nibble_mask(::Type{Pairdel}, a::UInt64, b::UInt64)
+
+Create a mask of the nibbles in two chunks of
+BioSequence{(DNA|RNA)Nucleotide{4}} data that represent sites where either or
+both of the two chunks have a nucleotide symbol that sould be ignored during
+pairwise distance computation at a given nibble.
+"""
 @inline function create_nibble_mask(::Type{Pairdel}, a::UInt64, b::UInt64)
     return create_mask(Pairdel, a) | create_mask(Pairdel, b)
 end
