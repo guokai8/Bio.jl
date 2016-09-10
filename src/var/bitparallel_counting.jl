@@ -65,12 +65,7 @@ end
 
 ## Base position masking functions.
 
-"""
-    mask_nibbles(x::UInt64, value::UInt64)
-
-An internal method, **not for export**, which creates bitmasks for nibbles
-(groups of four bits) matching certain values.
-"""
+#= Old version, new version uses fewer operations and is cleaner.
 @inline function mask_nibbles(x::UInt64, value::UInt64)
     x = ~(x $ value)
     x = (x & 0x1111111111111111) &
@@ -79,11 +74,41 @@ An internal method, **not for export**, which creates bitmasks for nibbles
     ((x >> 3) & 0x1111111111111111)
     return x | (x << 1) | (x << 2) | (x << 3)
 end
+=#
 
+"""
+    mask_nibbles(x::UInt64, value::UInt64)
+
+An internal method, **not for export**, which creates bitmasks for the nibbles
+(groups of four bits) in a 64 bit integer `x` that match a given value dictated
+by the pattern in `value`.
+"""
+@inline function mask_nibbles(x::UInt64, value::UInt64)
+    x $= value
+    x |= (x >> 1)
+    x |= (x >> 2)
+    x &= 0x1111111111111111
+    x *= 15
+    return ~x
+end
+
+
+"""
+    create_mask(::Type{Gap}, x::UInt64)
+
+Create a bitmask of the gap sites in a chunk of
+BioSequence{(DNA|RNA)Nucleotide{4}} data.
+"""
 @inline function create_mask(::Type{Gap}, x::UInt64)
     return mask_nibbles(x, 0x0000000000000000)
 end
 
+"""
+    create_mask(::Type{Ambiguous}, x::UInt64)
+
+Create a bitmask of the ambiguous sites in a chunk of
+BioSequence{(DNA|RNA)Nucleotide{4}} data.
+"""
 @inline function create_mask(::Type{Ambiguous}, x::UInt64)
     c = enumerate4(x)
     return mask_nibbles(c, 0x2222222222222222) |
@@ -91,6 +116,12 @@ end
     mask_nibbles(c, 0x4444444444444444)
 end
 
+"""
+    create_mask(::Type{Pairdel}, x::UInt64)
+
+Create a bitmask of the ambiguous sites in a chunk of
+BioSequence{(DNA|RNA)Nucleotide{4}} data.
+"""
 @inline function create_mask(::Type{Pairdel}, x::UInt64)
     return create_mask(Gap, x) | create_mask(Ambiguous, x)
 end
