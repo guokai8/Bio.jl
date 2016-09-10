@@ -21,54 +21,54 @@ using Bio.Var
             c = cseq.data[1]
 
             @testset "Counting zeros" begin
-                @test bp_count_allzero4(0x0000000000000000) == 16
-                @test bp_count_allzero4(0xF004020000403010) == 10
+                @test Var.count_zero_nibbles(0x0000000000000000) == 16
+                @test Var.count_zero_nibbles(0xF004020000403010) == 10
             end
 
             @testset "Enumerating nibbles" begin
-                @test bp_enumerate4(0x0000000000000000) == 0x0000000000000000
-                @test bp_enumerate4(0xF004020000403010) == 0x4001010000102010
+                @test Var.enumerate_nibbles(0x0000000000000000) == 0x0000000000000000
+                @test Var.enumerate_nibbles(0xF004020000403010) == 0x4001010000102010
             end
 
             @testset "Masking nibbles" begin
-                @test create_mask(Gap, a) == 0xf0f0000000000000
-                @test create_mask(Gap, b) == 0xff0f000000000000
-                @test create_mask(Gap, a, b) == 0xffff000000000000
-                @test create_mask(Ambiguous, a) == 0x0f000ff000000000
-                @test create_mask(Ambiguous, b) == 0x0000ffff00000000
-                @test create_mask(Ambiguous, a, b) == 0x0f00ffff00000000
-                @test create_mask(Pairdel, a) == 0xfff00ff000000000
-                @test create_mask(Pairdel, b) == 0xff0fffff00000000
-                @test create_mask(Pairdel, a, b) == 0xffffffff00000000
+                @test Var.create_nibble_mask(Gap, a) == 0xf0f0000000000000
+                @test Var.create_nibble_mask(Gap, b) == 0xff0f000000000000
+                @test Var.create_nibble_mask(Gap, a, b) == 0xffff000000000000
+                @test Var.create_nibble_mask(Ambiguous, a) == 0x0f000ff000000000
+                @test Var.create_nibble_mask(Ambiguous, b) == 0x0000ffff00000000
+                @test Var.create_nibble_mask(Ambiguous, a, b) == 0x0f00ffff00000000
+                @test Var.create_nibble_mask(Pairdel, a) == 0xfff00ff000000000
+                @test Var.create_nibble_mask(Pairdel, b) == 0xff0fffff00000000
+                @test Var.create_nibble_mask(Pairdel, a, b) == 0xffffffff00000000
             end
 
             @testset "Case counting" begin
 
                 @testset "Gaps" begin
-                    @test bitpar_count4(Gap, a) == 2
-                    @test bitpar_count4(Gap, b) == 3
-                    @test bitpar_count4(Gap, a | b) == bitpar_count4(Gap, b | a) == 1
-                    @test bitpar_count4(Gap, a, b) == bitpar_count4(Gap, b, a) == 4
+                    @test Var.count_sites4(Gap, a) == 2
+                    @test Var.count_sites4(Gap, b) == 3
+                    @test Var.count_sites4(Gap, a | b) == Var.count_sites4(Gap, b | a) == 1
+                    @test Var.count_sites4(Gap, a, b) == Var.count_sites4(Gap, b, a) == 4
                 end
 
                 @testset "Ambiguities" begin
-                    @test bitpar_count4(Ambiguous, c) == 11
-                    @test bitpar_count4(Ambiguous, a) == 3
-                    @test bitpar_count4(Ambiguous, b) == 4
+                    @test Var.count_sites4(Ambiguous, c) == 11
+                    @test Var.count_sites4(Ambiguous, a) == 3
+                    @test Var.count_sites4(Ambiguous, b) == 4
                 end
 
                 @testset "Pairdel" begin
-                    @test bitpar_count4(Pairdel, a) == 5
-                    @test bitpar_count4(Pairdel, b) == 7
-                    @test bitpar_count4(Pairdel, c) == 12
+                    @test Var.count_sites4(Pairdel, a) == 5
+                    @test Var.count_sites4(Pairdel, b) == 7
+                    @test Var.count_sites4(Pairdel, c) == 12
                 end
 
                 @testset "Matches" begin
-                    @test bitpar_count4(Match, a, b) == bitpar_count4(Match, b, a) == 4
+                    @test Var.count_sites4(Match, a, b) == Var.count_sites4(Match, b, a) == 4
                 end
 
                 @testset "Mismatches" begin
-                    @test bitpar_count4(Mismatch, a, b) == bitpar_count4(Mismatch, b, a) == 4
+                    @test Var.count_sites4(Mismatch, a, b) == Var.count_sites4(Mismatch, b, a) == 4
                 end
             end
         end
