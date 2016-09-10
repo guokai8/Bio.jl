@@ -55,6 +55,7 @@ using Bio.Var
                     @test Var.count_sites4(Ambiguous, c) == 11
                     @test Var.count_sites4(Ambiguous, a) == 3
                     @test Var.count_sites4(Ambiguous, b) == 4
+                    @test Var.count_sites4(Ambiguous, a, b) == Var.count_sites4(Ambiguous, b, a) == 5
                 end
 
                 @testset "Pairdel" begin
