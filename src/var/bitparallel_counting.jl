@@ -84,9 +84,13 @@ An internal method, **not for export**, which creates masks for the nibbles
 by the pattern in `value`.
 """
 @inline function create_nibble_mask(value::UInt64, x::UInt64)
+    # XOR with the desired values. So matching nibbles will be 0000.
     x $= value
+    # Horizontally OR the nibbles.
     x |= (x >> 1)
     x |= (x >> 2)
+    # AND removes junk, we then widen x by multiplication and return
+    # the inverse.
     x &= 0x1111111111111111
     x *= 15
     return ~x
