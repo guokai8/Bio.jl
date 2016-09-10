@@ -47,8 +47,8 @@ using Bio.Var
                 @testset "Gaps" begin
                     @test bitpar_count4(Gap, a) == 2
                     @test bitpar_count4(Gap, b) == 3
-                    @test bitpar_count4(Gap, a, b) == bitpar_count4(Gap, b, a) == 4
                     @test bitpar_count4(Gap, a | b) == bitpar_count4(Gap, b | a) == 1
+                    @test bitpar_count4(Gap, a, b) == bitpar_count4(Gap, b, a) == 4
                 end
 
                 @testset "Ambiguities" begin

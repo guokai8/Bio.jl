@@ -43,8 +43,8 @@ export
 
 
 
-include("bitparallel_counting.jl")
-include("mutation_counting.jl")
+include("mutation_counting/mutation_counting.jl")
+include("old_mutation_counting.jl")
 include("distances.jl")
 
 end # module Var

@@ -1,15 +1,41 @@
-abstract SiteCase
-immutable Match <: SiteCase end
-immutable Mismatch <: SiteCase end
-immutable Transition <: SiteCase end
-immutable Transversion <: SiteCase end
-immutable Gap <: SiteCase end
-immutable Ambiguous <: SiteCase end
-immutable Pairdel <: SiteCase end
+# Bitwise operations for identifying and counting mutations
+# =========================================================
+#
+# Internal bitwise methods used to identifying and counting mutations from the
+# 2 and 4 bit encoded representations
+#
+#
+# This file is a part of BioJulia.
+# License is MIT: https://github.com/BioJulia/Bio.jl/blob/master/LICENSE.md
+
+
+"""
+    enumerate_nibbles(abxor::UInt64)
+
+Count the number of set bits, in each nibble of a unsigned 64 bit integer
+(With BioSequence 4 bit encoding, each nibble is one RNA or DNA nucleotide).
+
+**This is an internal method and should not be exported.**
+
+E.g. An input of:
+
+0100 0010 0001 0110 1100 1110 1101 1111
+
+Would result in:
+
+0001 0001 0001 0010 0010 0011 0011 0100
+
+This is used to identify different occurances of bit patterns.
+"""
+@inline function enumerate_nibbles(x::UInt64)
+    x = x - ((x >> 1) & 0x5555555555555555)
+    return (x & 0x3333333333333333) + ((x >> 2) & 0x3333333333333333)
+end
 
 
 
-# Internal low-level functions
+
+
 
 """
     bp_count_allzero4()
@@ -41,27 +67,7 @@ Would result in:
     (x & 0x8888888888888888) >> 3)
 end
 
-"""
-    bp_enumerate4(abxor::UInt64)
 
-Count the number of set bits, in groups of four bits (which represent each abstract Nucleotide).
-
-**This is an internal method and should not be exported.**
-
-E.g. An input of:
-
-0100 0010 0001 0110 1100 1110 1101 1111
-
-Would result in:
-
-0001 0001 0001 0010 0010 0011 0011 0100
-
-This is used to identify different occurances of bit patterns.
-"""
-@inline function enumerate4(x::UInt64)
-    x = x - ((x >> 1) & 0x5555555555555555)
-    return (x & 0x3333333333333333) + ((x >> 2) & 0x3333333333333333)
-end
 
 ## Base position masking functions.
 
@@ -166,18 +172,8 @@ pairwise distance computation at a given nibble.
 end
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+## Bitparallel counting methods
+##-----------------------------
 
 """
     bitpar_count4(::Type{Gap}, x::UInt64)
@@ -191,18 +187,6 @@ functions.
 @inline function bitpar_count4(::Type{Gap}, x::UInt64)
     return bp_count_allzero4(x)
 end
-
-@inline function _mask(::Type{Gap}, x::UInt64)
-    return bp_enumerate4(~x)
-end
-
-@inline function _mask(::Type{Gap}, a::UInt64, b::UInt64)
-    return _mask(Gap, a) | _mask(Gap, b)
-end
-
-
-
-
 
 """
     bitpar_count4(::Type{Gap}, a::UInt64, b::UInt64)
