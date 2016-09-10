@@ -107,7 +107,7 @@ BioSequence{(DNA|RNA)Nucleotide{4}} data that represent gaps.
 **This is an internal method and should not be exported.**
 """
 @inline function create_nibble_mask(::Type{Gap}, x::UInt64)
-    return mask_nibbles(x, 0x0000000000000000)
+    return create_nibble_mask(x, 0x0000000000000000)
 end
 
 """
@@ -120,9 +120,9 @@ BioSequence{(DNA|RNA)Nucleotide{4}} data that represent ambiguous sites.
 """
 @inline function create_nibble_mask(::Type{Ambiguous}, x::UInt64)
     x = enumerate_nibbles(x)
-    return mask_nibbles(x, 0x2222222222222222) |
-    mask_nibbles(x, 0x3333333333333333) |
-    mask_nibbles(x, 0x4444444444444444)
+    return create_nibble_mask(x, 0x2222222222222222) |
+    create_nibble_mask(x, 0x3333333333333333) |
+    create_nibble_mask(x, 0x4444444444444444)
 end
 
 """
@@ -135,7 +135,7 @@ ignored, when counting pairwise mutations between sequences.
 **This is an internal method and should not be exported.**
 """
 @inline function create_nibble_mask(::Type{Pairdel}, x::UInt64)
-    return create_mask(Gap, x) | create_mask(Ambiguous, x)
+    return create_nibble_mask(Gap, x) | create_nibble_mask(Ambiguous, x)
 end
 
 """
@@ -148,7 +148,7 @@ both of the two chunks have a gap at a given nibble.
 **This is an internal method and should not be exported.**
 """
 @inline function create_nibble_mask(::Type{Gap}, a::UInt64, b::UInt64)
-    return create_mask(Gap, a) | create_mask(Gap, b)
+    return create_nibble_mask(Gap, a) | create_nibble_mask(Gap, b)
 end
 
 """
@@ -161,7 +161,7 @@ both of the two chunks have an ambiguous nucleotide at a given nibble.
 **This is an internal method and should not be exported.**
 """
 @inline function create_nibble_mask(::Type{Ambiguous}, a::UInt64, b::UInt64)
-    return create_mask(Ambiguous, a) | create_mask(Ambiguous, b)
+    return create_nibble_mask(Ambiguous, a) | create_nibble_mask(Ambiguous, b)
 end
 
 """
@@ -175,7 +175,7 @@ pairwise distance computation at a given nibble.
 **This is an internal method and should not be exported.**
 """
 @inline function create_nibble_mask(::Type{Pairdel}, a::UInt64, b::UInt64)
-    return create_mask(Pairdel, a) | create_mask(Pairdel, b)
+    return create_nibble_mask(Pairdel, a) | create_nibble_mask(Pairdel, b)
 end
 
 
@@ -254,10 +254,6 @@ Such sites are defined as those with gaps or ambiguous characters in them.
     return count_sites4(Ambiguous, x) + count_sites4(Gap, x)
 end
 
-@inline function count_sites4(::Type{Pairdel}, x::UInt64)
-    1 + count_sites4(Gap, a, b)
-end
-
 
 """
     count_sites4(::Type{Match}, a::UInt64, b::UInt64)
@@ -306,27 +302,6 @@ mismatches. For example, 'A' and 'R', or 'A' and '-' will not be counted.
     # matches or gaps, and subtract that from matchMismatchGapCount.
     matchGapCount = bitpar_zeros4(cases)
     return matchMismatchGapCount - matchGapCount
-end
-
-@inline function count_sites4(::Type{Ambiguous}, a::UInt64, b::UInt64)
-    cases = a $ b
-    # cases is the result of xoring a and b.
-    # If two nucleotides are different, they will contain 1's.
-    # If two nucleotides are matches or 2 gaps, they will only have 0's.
-    # Unambiguous mismatches always have 2 set bits, and we can explot this.
-    enumeratedCases = bitpar_enumerate4(cases)
-    # enumeratedCases contains the number of set bits, for each position.
-    # When a position is 0000, it either represents a match or a gap.
-    # A normal mismatch is 0010, anything ambiguous will not be 0010.
-    matchAmbiguousGapCount = bitpar_zeros4(enumeratedCases & 0x2222222222222222)
-    # The enumeratedCases are filtered by masking with 0x2222222...
-    # this results in ambiguous cases i.e. not 0010, being masked to 0000.
-    # These 0000 cases are then counted by bitpar_zeros4 to get the number of
-    # cases that are clear matches, ambiguous cases, and those that are gaps.
-    # To get the number of ambiguous cases, we now have to enumerate the number
-    # of matches or gaps, and subtract that from matchAmbiguousGapCount.
-    matchGapCount = bitpar_zeros4(cases)
-    return matchAmbiguousGapCount - matchGapCount
 end
 
 
