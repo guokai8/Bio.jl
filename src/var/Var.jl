@@ -14,8 +14,8 @@ export
 
     # Site Counting
     SiteCase,
-    Match,
-    Mismatch,
+    Conserved,
+    Mutated,
     Transition,
     Transversion,
     Gap,

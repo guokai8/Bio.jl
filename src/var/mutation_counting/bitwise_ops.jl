@@ -21,7 +21,7 @@
 """
     enumerate_nibbles(abxor::UInt64)
 
-Count the number of set bits, in each nibble of a unsigned 64 bit integer
+Count the number of set bits in each nibble of a unsigned 64 bit integer
 (With BioSequence 4 bit encoding, each nibble is one RNA or DNA nucleotide).
 
 **This is an internal method and should not be exported.**
@@ -34,7 +34,7 @@ Would result in:
 
 0001 0001 0001 0010 0010 0011 0011 0100
 
-This is used to identify different occurances of bit patterns.
+This is used to identify different occurances of certain bit patterns.
 """
 @inline function enumerate_nibbles(x::UInt64)
     x = x - ((x >> 1) & 0x5555555555555555)
@@ -81,12 +81,12 @@ end
     create_nibble_mask(x::UInt64, value::UInt64)
 
 Create a mask for the nibbles (groups of four bits) in a 64 bit integer `x`
-that match a given value dictated by the pattern in `value`.
+that Conserved a given value dictated by the pattern in `value`.
 
 **This is an internal method and should not be exported.**
 """
 @inline function create_nibble_mask(value::UInt64, x::UInt64)
-    # XOR with the desired values. So matching nibbles will be 0000.
+    # XOR with the desired values. So Conserveding nibbles will be 0000.
     x $= value
     # Horizontally OR the nibbles.
     x |= (x >> 1)
@@ -252,53 +252,58 @@ end
 
 
 
+
+
+
+
+
 """
-    count_sites4(::Type{Match}, a::UInt64, b::UInt64)
+    count_sites4(::Type{Conserved}, a::UInt64, b::UInt64)
 
 An _internal_ function, _not for export_, which will count the number of
-mismatches between two chunks of BioSequence{(DNA|RNA)Nucleotide{4}} data.
+Conserved between two chunks of BioSequence{(DNA|RNA)Nucleotide{4}} data.
 
 **Note:** Ambiguous cases or cases with gaps are ignored and not counted as
-matches. For example, 'A' and 'R', or 'A' and '-' will not be counted.
+Conserved. For example, 'A' and 'R', or 'A' and '-' will not be counted.
 """
-@inline function count_sites4(::Type{Match}, a::UInt64, b::UInt64)
+@inline function count_sites4(::Type{Conserved}, a::UInt64, b::UInt64)
     sharedGaps = count_sites4(Gap, a | b)
     cases = a $ b
     # cases is the result of xoring a and b.
     # if two nucleotides are different, they will contain 1's.
-    # if two nucleotides are matches or 2 gaps, they will only have 0's.
-    matchGapCount = count_zero_nibbles(cases)
-    return matchGapCount - sharedGaps
+    # if two nucleotides are Conservedes or 2 gaps, they will only have 0's.
+    ConservedGapCount = count_zero_nibbles(cases)
+    return ConservedGapCount - sharedGaps
 end
 
 """
-    count_sites4(::Type{Mismatch}, a::UInt64, b::UInt64)
+    count_sites4(::Type{Mutated}, a::UInt64, b::UInt64)
 
 An _internal_ function, _not for export_, which will count the number of
-mismatches between two chunks of BioSequence{(DNA|RNA)Nucleotide{4}} data.
+any mutations between two chunks of BioSequence{(DNA|RNA)Nucleotide{4}} data.
 
 **Note:** Ambiguous cases or cases with gaps are ignored and not counted as
-mismatches. For example, 'A' and 'R', or 'A' and '-' will not be counted.
+mutated. For example, 'A' and 'R', or 'A' and '-' will not be counted.
 """
-@inline function count_sites4(::Type{Mismatch}, a::UInt64, b::UInt64)
+@inline function count_sites4(::Type{Mutated}, a::UInt64, b::UInt64)
     cases = a $ b
     # cases is the result of xoring a and b.
     # If two nucleotides are different, they will contain 1's.
-    # If two nucleotides are matches or 2 gaps, they will only have 0's.
-    # Unambiguous mismatches always have 2 set bits, and we can explot this.
+    # If two nucleotides are Conservedes or 2 gaps, they will only have 0's.
+    # Unambiguous Mutatedes always have 2 set bits, and we can explot this.
     enumeratedCases = enumerate_nibbles(cases)
     # enumeratedCases contains the number of set bits, for each position.
-    # When a position is 0000, it either represents a match or a gap.
-    # A normal mismatch is 0010, anything ambiguous will not be 0010.
-    matchMismatchGapCount = count_zero_nibbles(enumeratedCases & 0xDDDDDDDDDDDDDDDD)
+    # When a position is 0000, it either represents a Conserved or a gap.
+    # A normal Mutated is 0010, anything ambiguous will not be 0010.
+    ConservedMutatedGapCount = count_zero_nibbles(enumeratedCases & 0xDDDDDDDDDDDDDDDD)
     # The enumeratedCases are filtered by masking with 0xDDDDDD...
-    # this results in clear mismatches i.e. 0010 being masked to 0000.
+    # this results in clear Mutatedes i.e. 0010 being masked to 0000.
     # These 0000 cases are then counted by count_zero_nibbles to get the number of
-    # cases that are clear matches, clear mismatches, and those that are gaps.
-    # To get the number of mismatches, we now have to enumerate the number of
-    # matches or gaps, and subtract that from matchMismatchGapCount.
-    matchGapCount = count_zero_nibbles(cases)
-    return matchMismatchGapCount - matchGapCount
+    # cases that are clear Conservedes, clear Mutatedes, and those that are gaps.
+    # To get the number of Mutatedes, we now have to enumerate the number of
+    # Conservedes or gaps, and subtract that from ConservedMutatedGapCount.
+    ConservedGapCount = count_zero_nibbles(cases)
+    return ConservedMutatedGapCount - ConservedGapCount
 end
 
 
@@ -308,17 +313,17 @@ end
 
 
 
-function bitpar_mismatches_gaps(a::UInt64, b::UInt64)
+function bitpar_Mutatedes_gaps(a::UInt64, b::UInt64)
     gapCount = gapcount(a, b)
-    match = a $ b
-    matchGapCount = count_zero_nibbles(match)
-    # matchBitCount contains the number of set bits, for each position.
-    # when a position is 0000, it either represents a match or a gap.
-    # A normal mismatch contains only two bits, now we will count them.
-    matchBitCount = count_sites4(match)     # 0010 is a normal mismatch.
-    filteredMatches = count_zero_nibbles(matchBitCount & 0xDDDDDDDDDDDDDDDD)
-    # filteredMatches represents the cases where the result was not 0010.
-    return filteredMatches - matchGapCount
+    Conserved = a $ b
+    ConservedGapCount = count_zero_nibbles(Conserved)
+    # ConservedBitCount contains the number of set bits, for each position.
+    # when a position is 0000, it either represents a Conserved or a gap.
+    # A normal Mutated contains only two bits, now we will count them.
+    ConservedBitCount = count_sites4(Conserved)     # 0010 is a normal Mutated.
+    filteredConservedes = count_zero_nibbles(ConservedBitCount & 0xDDDDDDDDDDDDDDDD)
+    # filteredConservedes represents the cases where the result was not 0010.
+    return filteredConservedes - ConservedGapCount
 end
 
 @inline function transition(a::UInt64, b::UInt64)
@@ -328,6 +333,6 @@ end
     gaTransitionFilter = abxor $ 0x5555555555555555
     ctTransitionCount = count_zero_nibbles(ctTransitionFilter)
     gaTransitionCount = count_zero_nibbles(gaTransitionFilter)
-    gapsOrMatchesCount = count_zero_nibbles(abxor)
+    gapsOrConservedesCount = count_zero_nibbles(abxor)
     return ctTransitionCount + gaTransitionCount
 end

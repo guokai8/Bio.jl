@@ -5,8 +5,8 @@
 # License is MIT: https://github.com/BioJulia/Bio.jl/blob/master/LICENSE.md
 
 abstract SiteCase
-immutable Match <: SiteCase end
-immutable Mismatch <: SiteCase end
+immutable Conserved <: SiteCase end
+immutable Mutated <: SiteCase end
 immutable Transition <: SiteCase end
 immutable Transversion <: SiteCase end
 immutable Gap <: SiteCase end

@@ -64,11 +64,11 @@ using Bio.Var
                     @test Var.count_sites4(Pairdel, c) == 12
                 end
 
-                @testset "Matches" begin
+                @testset "Conserved" begin
                     #@test Var.count_sites4(Match, a, b) == Var.count_sites4(Match, b, a) == 4
                 end
 
-                @testset "Mismatches" begin
+                @testset "Mutated" begin
                     #@test Var.count_sites4(Mismatch, a, b) == Var.count_sites4(Mismatch, b, a) == 4
                 end
             end
