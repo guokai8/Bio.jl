@@ -20,6 +20,7 @@ export
     Transversion,
     Gap,
     Ambiguous,
+    Pairdel,
 
     # Mutation types
     MutationType,
