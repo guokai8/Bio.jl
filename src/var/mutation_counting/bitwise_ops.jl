@@ -237,11 +237,6 @@ pairwise deletion.
     return 16 - count_zero_nibbles((enumerate_nibbles(a) | enumerate_nibbles(b)) & 0xEEEEEEEEEEEEEEEE)
 end
 
-
-
-
-
-
 """
     count_sites4(::Type{Pairdel}, x::UInt64)
 
@@ -253,6 +248,8 @@ Such sites are defined as those with gaps or ambiguous characters in them.
 @inline function count_sites4(::Type{Pairdel}, x::UInt64)
     return count_sites4(Ambiguous, x) + count_sites4(Gap, x)
 end
+
+
 
 
 """
