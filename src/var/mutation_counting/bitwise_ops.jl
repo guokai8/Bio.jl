@@ -270,7 +270,7 @@ matches. For example, 'A' and 'R', or 'A' and '-' will not be counted.
     # cases is the result of xoring a and b.
     # if two nucleotides are different, they will contain 1's.
     # if two nucleotides are matches or 2 gaps, they will only have 0's.
-    matchGapCount = bitpar_zeros4(cases)
+    matchGapCount = count_zero_nibbles(cases)
     return matchGapCount - sharedGaps
 end
 
@@ -289,18 +289,18 @@ mismatches. For example, 'A' and 'R', or 'A' and '-' will not be counted.
     # If two nucleotides are different, they will contain 1's.
     # If two nucleotides are matches or 2 gaps, they will only have 0's.
     # Unambiguous mismatches always have 2 set bits, and we can explot this.
-    enumeratedCases = bitpar_enumerate4(cases)
+    enumeratedCases = enumerate_nibbles(cases)
     # enumeratedCases contains the number of set bits, for each position.
     # When a position is 0000, it either represents a match or a gap.
     # A normal mismatch is 0010, anything ambiguous will not be 0010.
-    matchMismatchGapCount = bitpar_zeros4(enumeratedCases & 0xDDDDDDDDDDDDDDDD)
+    matchMismatchGapCount = count_zero_nibbles(enumeratedCases & 0xDDDDDDDDDDDDDDDD)
     # The enumeratedCases are filtered by masking with 0xDDDDDD...
     # this results in clear mismatches i.e. 0010 being masked to 0000.
-    # These 0000 cases are then counted by bitpar_zeros4 to get the number of
+    # These 0000 cases are then counted by count_zero_nibbles to get the number of
     # cases that are clear matches, clear mismatches, and those that are gaps.
     # To get the number of mismatches, we now have to enumerate the number of
     # matches or gaps, and subtract that from matchMismatchGapCount.
-    matchGapCount = bitpar_zeros4(cases)
+    matchGapCount = count_zero_nibbles(cases)
     return matchMismatchGapCount - matchGapCount
 end
 
@@ -314,12 +314,12 @@ end
 function bitpar_mismatches_gaps(a::UInt64, b::UInt64)
     gapCount = gapcount(a, b)
     match = a $ b
-    matchGapCount = bitpar_zeros4(match)
+    matchGapCount = count_zero_nibbles(match)
     # matchBitCount contains the number of set bits, for each position.
     # when a position is 0000, it either represents a match or a gap.
     # A normal mismatch contains only two bits, now we will count them.
     matchBitCount = count_sites4(match)     # 0010 is a normal mismatch.
-    filteredMatches = bitpar_zeros4(matchBitCount & 0xDDDDDDDDDDDDDDDD)
+    filteredMatches = count_zero_nibbles(matchBitCount & 0xDDDDDDDDDDDDDDDD)
     # filteredMatches represents the cases where the result was not 0010.
     return filteredMatches - matchGapCount
 end
@@ -329,8 +329,8 @@ end
     abxor = a $ b
     ctTransitionFilter = abxor $ 0xAAAAAAAAAAAAAAAA
     gaTransitionFilter = abxor $ 0x5555555555555555
-    ctTransitionCount = bitpar_zeros4(ctTransitionFilter)
-    gaTransitionCount = bitpar_zeros4(gaTransitionFilter)
-    gapsOrMatchesCount = bitpar_zeros4(abxor)
+    ctTransitionCount = count_zero_nibbles(ctTransitionFilter)
+    gaTransitionCount = count_zero_nibbles(gaTransitionFilter)
+    gapsOrMatchesCount = count_zero_nibbles(abxor)
     return ctTransitionCount + gaTransitionCount
 end
