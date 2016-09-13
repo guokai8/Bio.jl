@@ -178,6 +178,10 @@ pairwise distance computation at a given nibble.
     return create_nibble_mask(Pairdel, a) | create_nibble_mask(Pairdel, b)
 end
 
+@inline function create_nibble_mask(::Type{Conserved}, a::UInt64, b::UInt64)
+    return 
+end
+
 
 # Bitparallel site counting
 # =========================
