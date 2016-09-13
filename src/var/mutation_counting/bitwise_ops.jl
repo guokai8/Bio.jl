@@ -179,7 +179,11 @@ pairwise distance computation at a given nibble.
 end
 
 @inline function create_nibble_mask(::Type{Conserved}, a::UInt64, b::UInt64)
-    return 
+    pairdelmask = ~create_nibble_mask(Pairdel, a, b)
+    maskeda = a & pairdelmask
+    maskedb = b & pairdelmask
+    diffs = maskeda $ maskedb
+    return create_nibble_mask(diffs, 0x0000000000000000) & pairdelmask
 end
 
 
