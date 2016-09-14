@@ -11,7 +11,7 @@ using Bio.Var
 
         @testset "Bit parallel internals" begin
 
-            # 4 consecutive matches, 4 consecutive mismatches, 4 consecutive ambigs,
+            # 4 consecutive Conservedes, 4 consecutive misConservedes, 4 consecutive ambigs,
             # 4 consecutive gaps.
             aseq = dna"ATCGATCGARMGA-M-"
             bseq = dna"ATCGTCGARMWY-T--"
@@ -64,14 +64,19 @@ using Bio.Var
                     @test Var.count_sites4(Pairdel, a) == 5
                     @test Var.count_sites4(Pairdel, b) == 7
                     @test Var.count_sites4(Pairdel, c) == 12
+                    @test Var.count_sites4(Pairdel, a, b) == Var.count_sites4(Pairdel, b, a) == 8
+                    @test Var.count_sites4(Pairdel, a, c) == Var.count_sites4(Pairdel, c, a) == 12
+                    @test Var.count_sites4(Pairdel, b, c) == Var.count_sites4(Pairdel, b, a) == 12
                 end
 
                 @testset "Conserved" begin
-                    #@test Var.count_sites4(Match, a, b) == Var.count_sites4(Match, b, a) == 4
+                    @test Var.count_sites4(Conserved, a, b) == Var.count_sites4(Conserved, b, a) == 4
+                    @test Var.count_sites4(Conserved, a, c) == Var.count_sites4(Conserved, c, a) == 4
+                    @test Var.count_sites4(Conserved, b, c) == Var.count_sites4(Conserved, c, b) == 4
                 end
 
                 @testset "Mutated" begin
-                    #@test Var.count_sites4(Mismatch, a, b) == Var.count_sites4(Mismatch, b, a) == 4
+                    #@test Var.count_sites4(Mutated, a, b) == Var.count_sites4(Mutated, b, a) == 4
                 end
             end
         end

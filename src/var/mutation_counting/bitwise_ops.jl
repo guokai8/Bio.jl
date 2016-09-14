@@ -283,13 +283,17 @@ Such sites are defined as those with gaps or ambiguous characters in them.
     return count_sites4(Ambiguous, x) + count_sites4(Gap, x)
 end
 
+"""
+    count_sites4(::Type{Pairdel}, x::UInt64)
 
-
-
-
-
-
-
+An _internal_ function _not for export_, which will count the number of sites in
+aligned chunks of BioSequence{(DNA|RNA)Nucleotide{4}} data that would be ignored
+in counts of mutations.
+Such sites are defined as those with gaps or ambiguous characters in them.
+"""
+@inline function count_sites4(::Type{Pairdel}, a::UInt64, b::UInt64)
+    return count_sites4(Ambiguous, a, b) + count_sites4(Gap, a, b)
+end
 
 """
     count_sites4(::Type{Conserved}, a::UInt64, b::UInt64)
@@ -301,13 +305,15 @@ Conserved between two chunks of BioSequence{(DNA|RNA)Nucleotide{4}} data.
 Conserved. For example, 'A' and 'R', or 'A' and '-' will not be counted.
 """
 @inline function count_sites4(::Type{Conserved}, a::UInt64, b::UInt64)
-    sharedGaps = count_sites4(Gap, a | b)
-    cases = a $ b
-    # cases is the result of xoring a and b.
-    # if two nucleotides are different, they will contain 1's.
-    # if two nucleotides are Conservedes or 2 gaps, they will only have 0's.
-    ConservedGapCount = count_zero_nibbles(cases)
-    return ConservedGapCount - sharedGaps
+    # Create a nibble mask that gets rid of all the sites we are not interested
+    # in, and mask the two sequences.
+    pairdelmask = ~create_nibble_mask(Pairdel, a, b)
+    a &= pairdelmask
+    b &= pairdelmask
+    diffs = a $ b
+    initialZeros = count_zero_nibbles(pairdelmask)
+    conservedZeros = count_zero_nibbles(diffs)
+    return conservedZeros - initialZeros
 end
 
 """
