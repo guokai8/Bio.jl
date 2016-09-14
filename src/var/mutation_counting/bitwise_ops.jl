@@ -304,7 +304,7 @@ Such sites are defined as those with gaps or ambiguous characters in them.
 **This is an internal method and should not be exported.**
 """
 @inline function count_sites4(::Type{Pairdel}, a::UInt64, b::UInt64)
-    return count_sites4(Ambiguous, a, b) + count_sites4(Gap, a, b)
+    return count_zero_nibbles(~create_nibble_mask(Pairdel, a, b))
 end
 
 """
