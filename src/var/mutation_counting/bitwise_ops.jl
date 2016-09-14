@@ -178,6 +178,15 @@ pairwise distance computation at a given nibble.
     return create_nibble_mask(Pairdel, a) | create_nibble_mask(Pairdel, b)
 end
 
+"""
+    create_nibble_mask(::Type{Conserved}, a::UInt64, b::UInt64)
+
+Create a mask of the nibbles in two chunks of
+BioSequence{(DNA|RNA)Nucleotide{4}} data that represent sites where the encoded
+nucleotides are the same.
+
+**This is an internal method and should not be exported.**
+"""
 @inline function create_nibble_mask(::Type{Conserved}, a::UInt64, b::UInt64)
     pairdelmask = ~create_nibble_mask(Pairdel, a, b)
     maskeda = a & pairdelmask
@@ -186,6 +195,15 @@ end
     return create_nibble_mask(diffs, 0x0000000000000000) & pairdelmask
 end
 
+"""
+    create_nibble_mask(::Type{Conserved}, a::UInt64, b::UInt64)
+
+Create a mask of the nibbles in two chunks of
+BioSequence{(DNA|RNA)Nucleotide{4}} data that represent sites where the encoded
+nucleotides are different.
+
+**This is an internal method and should not be exported.**
+"""
 @inline function create_nibble_mask(::Type{Mutated}, a::UInt64, a::UInt64)
     pairdelmask = ~create_nibble_mask(Pairdel, a, b)
     maskeda = a & pairdelmask
