@@ -31,15 +31,15 @@ using Bio.Var
             end
 
             @testset "Masking nibbles" begin
-                @test Var.create_nibble_mask(Gap, a) == 0xf0f0000000000000
-                @test Var.create_nibble_mask(Gap, b) == 0xff0f000000000000
-                @test Var.create_nibble_mask(Gap, a, b) == 0xffff000000000000
-                @test Var.create_nibble_mask(Ambiguous, a) == 0x0f000ff000000000
-                @test Var.create_nibble_mask(Ambiguous, b) == 0x0000ffff00000000
-                @test Var.create_nibble_mask(Ambiguous, a, b) == 0x0f00ffff00000000
-                @test Var.create_nibble_mask(Pairdel, a) == 0xfff00ff000000000
-                @test Var.create_nibble_mask(Pairdel, b) == 0xff0fffff00000000
-                @test Var.create_nibble_mask(Pairdel, a, b) == 0xffffffff00000000
+                @test Var.create_nibble_mask(Gap, a) == 0xF0F0000000000000
+                @test Var.create_nibble_mask(Gap, b) == 0xFF0F000000000000
+                @test Var.create_nibble_mask(Gap, a, b) == 0xFFFF000000000000
+                @test Var.create_nibble_mask(Ambiguous, a) == 0x0F000FF000000000
+                @test Var.create_nibble_mask(Ambiguous, b) == 0x0000FFFF00000000
+                @test Var.create_nibble_mask(Ambiguous, a, b) == 0x0F00FFFF00000000
+                @test Var.create_nibble_mask(Pairdel, a) == 0xFFF00FF000000000
+                @test Var.create_nibble_mask(Pairdel, b) == 0xFF0FFFFF00000000
+                @test Var.create_nibble_mask(Pairdel, a, b) == 0xFFFFFFFF00000000
                 @test Var.create_nibble_mask(Conserved, a, b) == 0x000000000000FFFF
                 @test Var.create_nibble_mask(Mutated, a, b) == 0x00000000FFFF0000
             end
