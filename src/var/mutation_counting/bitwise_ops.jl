@@ -225,6 +225,8 @@ data.
 Note that gap sites and empty unused segments of a UInt64 are both 0000, and so
 furthur checking of this result would be required in higher level calling
 functions.
+
+**This is an internal method and should not be exported.**
 """
 @inline function count_sites4(::Type{Gap}, x::UInt64)
     return count_zero_nibbles(x)
@@ -239,6 +241,8 @@ BioSequence{(DNA|RNA)Nucleotide{4}} data which contain gap characters.
 Note that gap sites and empty unused segments of a UInt64 are both 0000, and so
 furthur checking of this result would be required in higher level calling
 functions.
+
+**This is an internal method and should not be exported.**
 """
 @inline function count_sites4(::Type{Gap}, a::UInt64, b::UInt64)
     # Count the gaps in a, count the gaps in b, subtract the number of shared gaps.
@@ -253,6 +257,8 @@ ambiguous sites in a chunk of BioSequence{(DNA|RNA)Nucleotide{4}} data.
 Ambiuous sites are defined as those with more than one bit set.
 Note here gap - 0000 - then is not ambiguous, even though it is a candidate for
 pairwise deletion.
+
+**This is an internal method and should not be exported.**
 """
 @inline function count_sites4(::Type{Ambiguous}, x::UInt64)
     return 16 - count_zero_nibbles(enumerate_nibbles(x) & 0xEEEEEEEEEEEEEEEE)
@@ -266,6 +272,8 @@ BioSequence{(DNA|RNA)Nucleotide{4}} data which contain ambiguous characters.
 Ambiuous sites are defined as those with more than one bit set.
 Note here gap - 0000 - then is not ambiguous, even though it is a candidate for
 pairwise deletion.
+
+**This is an internal method and should not be exported.**
 """
 @inline function count_sites4(::Type{Ambiguous}, a::UInt64, b::UInt64)
     return 16 - count_zero_nibbles((enumerate_nibbles(a) | enumerate_nibbles(b)) & 0xEEEEEEEEEEEEEEEE)
@@ -278,6 +286,8 @@ An _internal_ function _not for export_, which will count the number of sites in
 a chunk of BioSequence{(DNA|RNA)Nucleotide{4}} data that would be ignored in
 counts of mutations.
 Such sites are defined as those with gaps or ambiguous characters in them.
+
+**This is an internal method and should not be exported.**
 """
 @inline function count_sites4(::Type{Pairdel}, x::UInt64)
     return count_sites4(Ambiguous, x) + count_sites4(Gap, x)
@@ -290,6 +300,8 @@ An _internal_ function _not for export_, which will count the number of sites in
 aligned chunks of BioSequence{(DNA|RNA)Nucleotide{4}} data that would be ignored
 in counts of mutations.
 Such sites are defined as those with gaps or ambiguous characters in them.
+
+**This is an internal method and should not be exported.**
 """
 @inline function count_sites4(::Type{Pairdel}, a::UInt64, b::UInt64)
     return count_sites4(Ambiguous, a, b) + count_sites4(Gap, a, b)
@@ -303,6 +315,8 @@ Conserved between two chunks of BioSequence{(DNA|RNA)Nucleotide{4}} data.
 
 **Note:** Ambiguous cases or cases with gaps are ignored and not counted as
 Conserved. For example, 'A' and 'R', or 'A' and '-' will not be counted.
+
+**This is an internal method and should not be exported.**
 """
 @inline function count_sites4(::Type{Conserved}, a::UInt64, b::UInt64)
     # Create a nibble mask that gets rid of all the sites we are not interested
@@ -324,6 +338,8 @@ any mutations between two chunks of BioSequence{(DNA|RNA)Nucleotide{4}} data.
 
 **Note:** Ambiguous cases or cases with gaps are ignored and not counted as
 mutated. For example, 'A' and 'R', or 'A' and '-' will not be counted.
+
+**This is an internal method and should not be exported.**
 """
 @inline function count_sites4(::Type{Mutated}, a::UInt64, b::UInt64)
     cases = a $ b
