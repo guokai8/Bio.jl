@@ -316,7 +316,22 @@ end
 
 
 
+function testfun1()
+    a = 0
+    @inbounds for i in UInt64(1):UInt64(1000)
+        a += enumerate_nibbles(i)
+    end
+    return a
+end
 
+function testfun2()
+    a = 0
+    @inbounds for i in UInt64(1):UInt64(1000)
+        i = i - ((i >> 1) & 0x5555555555555555)
+        a += ((i & 0x3333333333333333) + ((i >> 2) & 0x3333333333333333))
+    end
+    return a
+end
 
 
 
