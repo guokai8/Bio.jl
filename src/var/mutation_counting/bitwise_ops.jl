@@ -204,7 +204,7 @@ nucleotides are different.
 
 **This is an internal method and should not be exported.**
 """
-@inline function create_nibble_mask(::Type{Mutated}, a::UInt64, a::UInt64)
+@inline function create_nibble_mask(::Type{Mutated}, a::UInt64, b::UInt64)
     pairdelmask = ~create_nibble_mask(Pairdel, a, b)
     maskeda = a & pairdelmask
     maskedb = b & pairdelmask
