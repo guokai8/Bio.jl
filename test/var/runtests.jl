@@ -51,6 +51,10 @@ using Bio.Var
                     @test Var.count_sites4(Gap, b) == 3
                     @test Var.count_sites4(Gap, a | b) == Var.count_sites4(Gap, b | a) == 1
                     @test Var.count_sites4(Gap, a, b) == Var.count_sites4(Gap, b, a) == 4
+                    @test Var.count_sites4(Gap, a | c) == Var.count_sites4(Gap, c | a) == 1
+                    @test Var.count_sites4(Gap, a, c) == Var.count_sites4(Gap, c, a) == 2
+                    @test Var.count_sites4(Gap, b, c) == Var.count_sites4(Gap, c, b) == 3
+                    @test Var.count_sites4(Gap, b | c) == Var.count_sites4(Gap, c | b) == 1
                 end
 
                 @testset "Ambiguities" begin
@@ -58,6 +62,8 @@ using Bio.Var
                     @test Var.count_sites4(Ambiguous, a) == 3
                     @test Var.count_sites4(Ambiguous, b) == 4
                     @test Var.count_sites4(Ambiguous, a, b) == Var.count_sites4(Ambiguous, b, a) == 5
+                    @test Var.count_sites4(Ambiguous, a, c) == Var.count_sites4(Ambiguous, c, a) == 11
+                    @test Var.count_sites4(Ambiguous, b, c) == Var.count_sites4(Ambiguous, c, b) == 11
                 end
 
                 @testset "Pairdel" begin
