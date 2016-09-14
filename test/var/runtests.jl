@@ -41,6 +41,7 @@ using Bio.Var
                 @test Var.create_nibble_mask(Pairdel, b) == 0xff0fffff00000000
                 @test Var.create_nibble_mask(Pairdel, a, b) == 0xffffffff00000000
                 @test Var.create_nibble_mask(Conserved, a, b) == 0x000000000000FFFF
+                @test Var.create_nibble_mask(Mutated, a, b) == 0x00000000FFFF0000
             end
 
             @testset "Case counting" begin
