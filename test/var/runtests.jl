@@ -72,7 +72,7 @@ using Bio.Var
                     @test Var.count_sites4(Pairdel, c) == 12
                     @test Var.count_sites4(Pairdel, a, b) == Var.count_sites4(Pairdel, b, a) == 8
                     @test Var.count_sites4(Pairdel, a, c) == Var.count_sites4(Pairdel, c, a) == 12
-                    @test Var.count_sites4(Pairdel, b, c) == Var.count_sites4(Pairdel, b, a) == 12
+                    @test Var.count_sites4(Pairdel, b, c) == Var.count_sites4(Pairdel, c, b) == 12
                 end
 
                 @testset "Conserved" begin
