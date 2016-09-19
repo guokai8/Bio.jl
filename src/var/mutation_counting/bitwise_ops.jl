@@ -354,7 +354,7 @@ mutated. For example, 'A' and 'R', or 'A' and '-' will not be counted.
     diffs = a $ b
     initialZeros = count_zero_nibbles(pairdelmask)
     conservedZeros = count_zero_nibbles(diffs)
-    return 16 - (conservedZeros - initialZeros)
+    return 16 - initialZeros - (conservedZeros - initialZeros)
 end
 
 
