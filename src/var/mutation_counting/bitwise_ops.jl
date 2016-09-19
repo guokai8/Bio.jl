@@ -331,23 +331,6 @@ mutated. For example, 'A' and 'R', or 'A' and '-' will not be counted.
 **This is an internal method and should not be exported.**
 """
 @inline function count_sites4(::Type{Mutated}, a::UInt64, b::UInt64)
-    ## cases = a $ b
-    # cases is the result of xoring a and b.
-    # If two nucleotides are different, they will contain 1's.
-    # If two nucleotides are Conservedes or 2 gaps, they will only have 0's.
-    # Unambiguous Mutatedes always have 2 set bits, and we can explot this.
-    ##enumeratedCases = enumerate_nibbles(cases)
-    # enumeratedCases contains the number of set bits, for each position.
-    # When a position is 0000, it either represents a Conserved or a gap.
-    # A normal Mutated is 0010, anything ambiguous will not be 0010.
-    ##ConservedMutatedGapCount = count_zero_nibbles(enumeratedCases & 0xDDDDDDDDDDDDDDDD)
-    # The enumeratedCases are filtered by masking with 0xDDDDDD...
-    # this results in clear Mutatedes i.e. 0010 being masked to 0000.
-    # These 0000 cases are then counted by count_zero_nibbles to get the number of
-    # cases that are clear Conservedes, clear Mutatedes, and those that are gaps.
-    # To get the number of Mutatedes, we now have to enumerate the number of
-    # Conservedes or gaps, and subtract that from ConservedMutatedGapCount.
-    ## ConservedGapCount = count_zero_nibbles(cases)
     pairdelmask = ~create_nibble_mask(Pairdel, a, b)
     a &= pairdelmask
     b &= pairdelmask
