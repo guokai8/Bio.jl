@@ -345,12 +345,8 @@ end
     a &= pairdelmask
     b &= pairdelmask
     diffs = a $ b
-    ct_filtered = diffs $ 0xAAAAAAAAAAAAAAAA
-    ga_filtered = diffs $ 0x5555555555555555
-
-    gapcount = count_sites4(Gap, a, b)
-    ctTransitionCount = count_zero_nibbles(ctTransitionFilter)
-    gaTransitionCount = count_zero_nibbles(gaTransitionFilter)
-    gapsOrConservedesCount = count_zero_nibbles(abxor)
-    return ctTransitionCount + gaTransitionCount
+    #ct_filtered = diffs $ 0xAAAAAAAAAAAAAAAA
+    #ga_filtered = diffs $ 0x5555555555555555
+    ts_filtered = diffs $ 0xAAAAAAAAAAAAAAAA
+    return count_zero_nibbles(ts_filtered) + count_zero_nibbles(~ts_filtered)
 end
