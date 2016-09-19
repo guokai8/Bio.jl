@@ -82,7 +82,7 @@ using Bio.Var
                 end
 
                 @testset "Mutated" begin
-                    #@test Var.count_sites4(Mutated, a, b) == Var.count_sites4(Mutated, b, a) == 4
+                    @test Var.count_sites4(Mutated, a, b) == Var.count_sites4(Mutated, b, a) == 4
                 end
             end
         end
