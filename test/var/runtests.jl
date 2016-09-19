@@ -89,8 +89,8 @@ using Bio.Var
 
                 @testset "Transition" begin
                     @test Var.count_sites4(Transition, a, b) == Var.count_sites4(Transition, b, a) == 2
-                    @test Var.count_sites4(Transition, a, c) == Var.count_sites4(Transition, b, c) == 4
-                    @test Var.count_sites4(Transition, b, c) == Var.count_sites4(Transition, c, b) == 4
+                    @test Var.count_sites4(Transition, a, c) == Var.count_sites4(Transition, b, c) == 0
+                    @test Var.count_sites4(Transition, b, c) == Var.count_sites4(Transition, c, b) == 0
                 end
             end
         end
