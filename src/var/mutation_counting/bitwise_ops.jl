@@ -340,27 +340,15 @@ mutated. For example, 'A' and 'R', or 'A' and '-' will not be counted.
     return 16 - (initialZeros + (conservedZeros - initialZeros))
 end
 
+@inline function count_sites4(::Type{Transition}, a::UInt64, b::UInt64)
+    pairdelmask = ~create_nibble_mask(Pairdel, a, b)
+    a &= pairdelmask
+    b &= pairdelmask
+    diffs = a $ b
+    ct_filtered = diffs $ 0xAAAAAAAAAAAAAAAA
+    ga_filtered = diffs $ 0x5555555555555555
 
-
-
-function bitpar_Mutatedes_gaps(a::UInt64, b::UInt64)
-    gapCount = gapcount(a, b)
-    Conserved = a $ b
-    ConservedGapCount = count_zero_nibbles(Conserved)
-    # ConservedBitCount contains the number of set bits, for each position.
-    # when a position is 0000, it either represents a Conserved or a gap.
-    # A normal Mutated contains only two bits, now we will count them.
-    ConservedBitCount = count_sites4(Conserved)     # 0010 is a normal Mutated.
-    filteredConservedes = count_zero_nibbles(ConservedBitCount & 0xDDDDDDDDDDDDDDDD)
-    # filteredConservedes represents the cases where the result was not 0010.
-    return filteredConservedes - ConservedGapCount
-end
-
-@inline function transition(a::UInt64, b::UInt64)
-    gapCount = gapcount(a, b)
-    abxor = a $ b
-    ctTransitionFilter = abxor $ 0xAAAAAAAAAAAAAAAA
-    gaTransitionFilter = abxor $ 0x5555555555555555
+    gapcount = count_sites4(Gap, a, b)
     ctTransitionCount = count_zero_nibbles(ctTransitionFilter)
     gaTransitionCount = count_zero_nibbles(gaTransitionFilter)
     gapsOrConservedesCount = count_zero_nibbles(abxor)
