@@ -21,6 +21,7 @@ export
     Gap,
     Ambiguous,
     Pairdel,
+    count_sites,
 
     # Mutation types
     MutationType,

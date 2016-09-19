@@ -96,6 +96,16 @@ using Bio.Var
         end
     end
 
+    @testset "Counting sites" begin
+        @testset "One sequence" begin
+            testseq1 = dna"AAAAATTTTTRM--YGGGGG"
+            testseq2 = dna"ATCGNYR"
+
+            @test count_sites(Ambiguous, testseq1)
+            @test count_sites(Ambiguous, testseq2)
+        end
+    end
+
     @testset "Old functionality" begin
         @testset "Counting mutations" begin
 
