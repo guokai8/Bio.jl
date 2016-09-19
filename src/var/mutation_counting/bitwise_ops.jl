@@ -338,6 +338,18 @@ mutated. For example, 'A' and 'R', or 'A' and '-' will not be counted.
     return 16 - (initialZeros + (conservedZeros - initialZeros))
 end
 
+"""
+    count_sites4(::Type{Transition}, a::UInt64, b::UInt64)
+
+An _internal_ function, _not for export_, which will count the number of
+transition mutations between two chunks of BioSequence{(DNA|RNA)Nucleotide{4}}
+data.
+
+**Note:** Ambiguous cases or cases with gaps are ignored and not counted as
+mutated. For example, 'A' and 'R', or 'A' and '-' will not be counted.
+
+**This is an internal method and should not be exported.**
+"""
 @inline function count_sites4(::Type{Transition}, a::UInt64, b::UInt64)
     pairdelmask = ~create_nibble_mask(Pairdel, a, b)
     a &= pairdelmask
