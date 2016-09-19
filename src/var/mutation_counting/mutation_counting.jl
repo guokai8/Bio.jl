@@ -17,15 +17,15 @@ include("bitwise_ops.jl")
 
 typealias FourBitAlphs Union{DNANucleotide{4},RNANucleotide{4}}
 
-function count_sites{T<:SiteCase,A<:FourBitAlphs}(::Type{T}, seq::BioSequence{A})
+function count_sites{A<:FourBitAlphs}(::Type{Ambiguous}, seq::BioSequence{A})
     site_count = 0
     bindex = Seq.bitindex(seq, 1)
-    off = Seq.offset(bindex)
+    firstoff = Seq.offset(bindex)
 
     # If the offset of the first element is not zero, then the first integer
     # needs to be shifted / masked.
-    if off != 0
-        offsetint = seq.data[1] >> off
+    if firstoff != 0
+        offsetint = seq.data[1] >> firstoff
         site_count += count_sites4(T, offsetint)
     end
 
