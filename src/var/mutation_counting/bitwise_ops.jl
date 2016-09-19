@@ -308,8 +308,6 @@ Conserved. For example, 'A' and 'R', or 'A' and '-' will not be counted.
 **This is an internal method and should not be exported.**
 """
 @inline function count_sites4(::Type{Conserved}, a::UInt64, b::UInt64)
-    # Create a nibble mask that gets rid of all the sites we are not interested
-    # in, and mask the two sequences.
     pairdelmask = ~create_nibble_mask(Pairdel, a, b)
     a &= pairdelmask
     b &= pairdelmask
@@ -345,8 +343,6 @@ end
     a &= pairdelmask
     b &= pairdelmask
     diffs = a $ b
-    #ct_filtered = diffs $ 0xAAAAAAAAAAAAAAAA
-    #ga_filtered = diffs $ 0x5555555555555555
     ts_filtered = diffs $ 0xAAAAAAAAAAAAAAAA
     return count_zero_nibbles(ts_filtered) + count_zero_nibbles(~ts_filtered)
 end
