@@ -30,7 +30,7 @@ function count_sites{A<:FourBitAlphs}(::Type{Ambiguous}, seq::BioSequence{A})
     end
 
     for i in 2:endof(seq.data)
-        site_count += count_sites4(T, seq.data[i])
+        site_count += count_sites4(Ambiguous, seq.data[i])
     end
 
     return site_count
