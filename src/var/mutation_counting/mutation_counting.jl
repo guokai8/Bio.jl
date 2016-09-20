@@ -15,7 +15,7 @@ immutable Pairdel <: SiteCase end
 
 include("bitwise_ops.jl")
 
-typealias FourBitAlphs Union{DNANucleotide{4},RNANucleotide{4}}
+typealias FourBitAlphs Union{DNAAlphabet{4},RNAAlphabet{4}}
 
 function count_sites{A<:FourBitAlphs}(::Type{Ambiguous}, seq::BioSequence{A})
     site_count = 0
