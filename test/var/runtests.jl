@@ -100,9 +100,11 @@ using Bio.Var
         @testset "One sequence" begin
             testseq1 = dna"AAAAATTTTTRM--YGGGGG"
             testseq2 = dna"ATCGNYR"
+            testseq3 = dna"ATCGB"
 
-            @test count_sites(Ambiguous, testseq1)
-            @test count_sites(Ambiguous, testseq2)
+            @test count_sites(Ambiguous, testseq1) == 3
+            @test count_sites(Ambiguous, testseq2) == 3
+            @test count_sites(Ambiguous, testseq3) == 1
         end
     end
 
