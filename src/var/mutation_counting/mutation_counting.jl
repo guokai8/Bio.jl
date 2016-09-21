@@ -27,12 +27,14 @@ function count_sites{A<:FourBitAlphs}(::Type{Ambiguous}, seq::BioSequence{A})
     if firstoff != 0
         offsetint = seq.data[1] >> firstoff
         site_count += count_sites4(T, offsetint)
+        for i in 2:endof(seq.data)
+            site_count += count_sites4(Ambiguous, seq.data[i])
+        end
+    else
+        for i in 1:endof(seq.data)
+            site_count += count_sites4(Ambiguous, seq.data[i])
+        end
     end
-
-    for i in 2:endof(seq.data)
-        site_count += count_sites4(Ambiguous, seq.data[i])
-    end
-
     return site_count
 end
 
