@@ -62,6 +62,26 @@ Would give the answer: 1.
     (x & 0x8888888888888888) >> 3)
 end
 
+"""
+    count_one_nibbles(x::UInt64)
+
+Counts the number of nibbles in a UInt64 `x` that have all their bits set i.e.
+all nibbles of 1111.
+
+**This is an internal method and should not be exported.**
+
+E.g. An input of:
+
+0x0111111111111111
+
+Would give the answer: 1.
+"""
+@inline function count_one_nibbles(x::UInt64)
+    return count_ones((x & 0x1111111111111111) &
+    ((x & 0x2222222222222222) >> 1) &
+    ((x & 0x4444444444444444) >> 2) &
+    ((x & 0x8888888888888888) >> 3))
+end
 
 # Nibble masking functions
 # ------------------------
