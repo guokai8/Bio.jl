@@ -23,6 +23,14 @@ using Bio.Var
             @testset "Counting zeros" begin
                 @test Var.count_zero_nibbles(0x0000000000000000) == 16
                 @test Var.count_zero_nibbles(0xF004020000403010) == 10
+                @test Var.count_zero_nibbles(0xFFFFFFFFFFFFFFFF) == 0
+            end
+
+            @testset "Counting ones" begin
+                @test Var.count_one_nibbles(0x01011C1111F11011) == 1
+                @test Var.count_one_nibbles(0xF4011C1111F1101F) == 3
+                @test Var.count_one_nibbles(0x0000000000000000) == 0
+                @test Var.count_one_nibbles(0xFFFFFFFFFFFFFFFF) == 16
             end
 
             @testset "Enumerating nibbles" begin
