@@ -1,5 +1,12 @@
+# Iterating over binary sequence data in an aligned manner
+# ========================================================
+#
+# Not really for export, but for making fast comparrisons between two BioSequences
+# which may not have their binary data aligned flush to whole 64 bit integers.
+#
+# This file is a part of BioJulia.
+# License is MIT: https://github.com/BioJulia/Bio.jl/blob/master/LICENSE.md
 
-# Iterator to iterate over binary sequence data in aligned manner.
 immutable AlignedDataItr
     seq::DNASequence
     lastInt::Int
