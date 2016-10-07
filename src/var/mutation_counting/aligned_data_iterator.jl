@@ -1,83 +1,30 @@
 
-# Iterator to iterate over sequences
+# Iterator to iterate over binary sequence data in aligned manner.
 immutable AlignedDataItr
     seq::DNASequence
-    frontMask::UInt64
-    backMask::UInt64
-    firstInt::Int
     lastInt::Int
     off::Int
     revoff::Int
 end
 
 function aligned_data(seq::DNASequence)
-    bi = Seq.bitindex(seq, 1)
-    off = Seq.offset(bi)
-    bm = Seq.mask(off)
-    fm = ~bm
-    return AlignedDataItr(seq, fm, bm,
-                          Seq.index(bi),
-                          Seq.index(Seq.bitindex(seq, endof(seq))),
-                          off,
-                          64 - off)
+    off = Seq.offset(Seq.bitindex(seq, 1))
+    return AlignedDataItr(seq, Seq.index(Seq.bitindex(seq, endof(seq))), off, 64 - off)
 end
 
-@inline Base.start(itr::AlignedDataItr) = (firstInt, firstInt + 1)
+@inline function Base.start(itr::AlignedDataItr)
+    i = Seq.index(Seq.bitindex(itr.seq, 1))
+    return (i, i + 1)
+end
 
 @inline function Base.next(itr::AlignedDataItr, state::Tuple{Int64, Int64})
-    # There may not even be any need of frontMask and backMask.
-    # val = ((itr.seq.data[1] & itr.frontMask) >> itr.off) |
-    #      ((itr.seq.data[2] & itr.backMask) << (64 - itr.revoff))
-
-    val = (itr.seq.data[state[1]] >> itr.off)
-    val |= (itr.seq.data[state[2]] << itr.revoff)
-
-    return val, state
+    val = itr.seq.data[state[1]] >> itr.off
+    val |= ifelse(state[1] == itr.lastInt,
+                  UInt64(0),
+                  itr.seq.data[state[2]] << itr.revoff)
+    return val, (state[2], state[2] + 1)
 end
 
-@inline function Base.done(itritr::AlignedDataItr, state::Tuple{Int64, Int64})
-
-end
-
-
-
-immutable AlignedIteratorState
-    at::UInt64
-    first::UInt64
-    last::UInt64
-    len::UInt64
-    firstoffset::UInt8
-    lastoffset::UInt8
-end
-
-function Base.start(iter::AlignedIterator)
-    return AlignedIteratorState(1,
-    Seq.index(Seq.bitindex(iter.seq, 1)),
-    Seq.index(Seq.bitindex(iter.seq, endof(iter.seq))),
-    (Seq.index(Seq.bitindex(iter.seq, endof(iter.seq))) - Seq.index(Seq.bitindex(iter.seq, 1))) + 1,
-    Seq.offset(Seq.bitindex(iter.seq, 1)),
-    Seq.offset(Seq.bitindex(iter.seq, endof(iter.seq)))
-    )
-end
-
-function next(iter::AlignedIterator, state)
-    if state.firstoffset == 0 && state.lastoffset == 60
-        return (iter.seq.data[state.first + state.at], AlignedIteratorState(
-        state.at + 1,
-        state.first,
-        state.last,
-        state.len,
-        state.firstoffset,
-        state.lastoffset))
-    elseif state.firstoffset != 0 && state.lastoffset == 60
-
-    elseif state.firstoffset == 0 && state.lastoffset != 60
-
-    elseif state.firstoffset != 0 && state.lastoffset != 60
-
-    end
-end
-
-function done(iter, state)
-    return state.at > state.len
+@inline function Base.done(itr::AlignedDataItr, state::Tuple{Int64, Int64})
+    return state[1] > itr.lastInt
 end
