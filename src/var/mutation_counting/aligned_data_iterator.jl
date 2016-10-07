@@ -32,7 +32,7 @@ end
     val = (itr.seq.data[state[1]] >> itr.off)
     val |= (itr.seq.data[state[2]] << itr.revoff)
 
-    return val
+    return val, state
 end
 
 @inline function Base.done(itritr::AlignedDataItr, state::Tuple{Int64, Int64})
