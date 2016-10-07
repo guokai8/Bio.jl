@@ -14,6 +14,7 @@ immutable Ambiguous <: SiteCase end
 immutable Pairdel <: SiteCase end
 
 include("bitwise_ops.jl")
+include("aligned_data_iterator.jl")
 
 typealias FourBitAlphs Union{DNAAlphabet{4},RNAAlphabet{4}}
 
@@ -46,39 +47,8 @@ end
 
 
 function count_sites{T<:SiteCase,A}(::Type{T}, a::BioSequence{A}, b::BioSequence{A})
+
     @assert length(a) == length(b)
-
-    bindexA = Seq.bitindex(a, 1)
-    bindexB = Seq.bitindex(b, 1)
-
-
-
-    nelem_a = enda - starta
-    nelem_b = endb - startb
-    min_nelem = min(nelem_a, nelem_b)
-
-    start = max(starta, startb)
-    stop = min(enda, endb)
-
-    aligned_int_a = UInt64(0)
-    aligned_int_b = UInt64(0)
-
-    if Seq.offset(bindexA, 1) == 0 && Seq.offset(bindexB, 1) == 0
-        # Normal for loop
-    else
-
-        starta = Seq.index(bindexA)
-        startb = Seq.index(bindexB)
-        enda = Seq.index(Seq.bitindex(a, endof(a)))
-        endb = Seq.index(Seq.bitindex(b, endof(b)))
-
-        if Seq.offset(bindexA, 1) > Seq.offset(bindexB, 1)
-
-        end
-
-
-
-    end
 
 
 end
