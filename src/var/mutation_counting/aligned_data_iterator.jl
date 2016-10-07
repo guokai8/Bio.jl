@@ -7,7 +7,7 @@
 # This file is a part of BioJulia.
 # License is MIT: https://github.com/BioJulia/Bio.jl/blob/master/LICENSE.md
 
-immutable ShiftedIntsItr{T <: Unsigned}
+immutable ShiftedIntsItr{T<:Unsigned}
     vec::Vector{T}
     firstInt::Int
     lastInt::Int
@@ -45,4 +45,8 @@ end
 
 @inline function Base.done(itr::ShiftedIntsItr, state::Tuple{Int64, Int64})
     return state[1] > itr.lastInt
+end
+
+@inline function Base.eltype{T<:Unsigned}(::Type{ShiftedIntsItr{T}})
+    return T
 end
