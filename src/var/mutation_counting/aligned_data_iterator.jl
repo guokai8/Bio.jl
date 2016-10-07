@@ -7,31 +7,42 @@
 # This file is a part of BioJulia.
 # License is MIT: https://github.com/BioJulia/Bio.jl/blob/master/LICENSE.md
 
-immutable AlignedDataItr
-    seq::DNASequence
+immutable ShiftedIntsItr{T <: Unsigned}
+    vec::Vector{T}
+    firstInt::Int
     lastInt::Int
-    off::Int
-    revoff::Int
+    shift::Int
+    revShift::Int
+
+    function ShiftedIntsItr(vec::Vector{T}, firstInt::Int, lastInt::Int, shift::Int)
+        @assert firstInt >= 1
+        @assert lastInt <= endof(vec)
+        ws = sizeof(T) * 8
+        @assert shift > 0 && shift <= ws
+        return new(vec, firstInt, lastInt, shift, ws - shift)
+    end
 end
 
-function aligned_data(seq::DNASequence)
-    off = Seq.offset(Seq.bitindex(seq, 1))
-    return AlignedDataItr(seq, Seq.index(Seq.bitindex(seq, endof(seq))), off, 64 - off)
+function ShiftedIntsItr(seq::DNASequence)
+    bi = Seq.bitindex(seq, 1)
+    shift = Seq.offset(bi)
+    return ShiftedIntsItr(seq.data,
+                          Seq.index(bi),
+                          Seq.index(Seq.bitindex(seq, endof(seq))),
+                          shift)
 end
 
-@inline function Base.start(itr::AlignedDataItr)
-    i = Seq.index(Seq.bitindex(itr.seq, 1))
-    return (i, i + 1)
+@inline function Base.start(itr::ShiftedIntsItr)
+    return itr.firstInt, itr.firstInt + 1
 end
 
-@inline function Base.next(itr::AlignedDataItr, state::Tuple{Int64, Int64})
-    val = itr.seq.data[state[1]] >> itr.off
-    val |= ifelse(state[1] == itr.lastInt,
-                  UInt64(0),
-                  itr.seq.data[state[2]] << itr.revoff)
+@inline function Base.next(itr::ShiftedIntsItr, state::Tuple{Int64, Int64})
+    val = ifelse(state[1] == itr.lastInt,
+                 itr.vec[state[1]] >> itr.shift,
+                 (itr.vec[state[1]] >> itr.shift) | (itr.vec[state[2]] << itr.revShift))
     return val, (state[2], state[2] + 1)
 end
 
-@inline function Base.done(itr::AlignedDataItr, state::Tuple{Int64, Int64})
+@inline function Base.done(itr::ShiftedIntsItr, state::Tuple{Int64, Int64})
     return state[1] > itr.lastInt
 end

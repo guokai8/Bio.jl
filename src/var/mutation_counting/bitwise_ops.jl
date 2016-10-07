@@ -72,7 +72,7 @@ all nibbles of 1111.
 
 E.g. An input of:
 
-0x0111111111111111
+0x0000000000001111
 
 Would give the answer: 1.
 """
